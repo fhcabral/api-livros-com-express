@@ -1,5 +1,5 @@
-import { autor } from "../models/Autor.js"
-import { livro } from "../models/Livro.js"
+import autor from "../models/Autor.js";
+import mongoose from "mongoose";
 
 class AutorController {
 
@@ -27,23 +27,20 @@ class AutorController {
                 })
             } 
            } catch (erro) {
+            if(erro instanceof mongoose.Error.CastError) {
+                res.status(400).send({ message: "Um ou mais dados fornecidos estão incorretos."})
+            }
              res
                .status(500)
-               .json({ message: `${erro.message} - falha na requisição` });
+               .json({ message: `${erro.message} - Erro interno de servidor` });
            }
     }
 
     static async cadastrarAutores (req, res) {
-        const novoAutor = req.body;
         try {
-            const autorEncontrado = await livro.findById(novoAutor.livro);
-            const autorCompleto = {...novoAutor, livro: {...autorEncontrado._doc}}
-            const autorCriado =  await autor.create(autorCompleto);
-            res.status(201).json(
-                {
-                message: "criado com sucesso",
-                livro: autorCriado
-            });
+            let autores = new autor(req.body);
+            const autorResultado = await autores.save();
+             res.status(201).send(autorResultado.toJSON());
         } catch (erro) {
             res.status(500).json(
                 {
@@ -55,8 +52,8 @@ class AutorController {
     static async alterarAutores (req, res) {
         try {
             const id = req.params.id;
-            await livro.findByIdAndUpdate(id, req.body);
-            res.status(200).json({message: "Livro atualizado"});
+            await autor.findByIdAndUpdate(id, {$set: req.body});
+            res.status(200).send({message: "Autor atualizado com sucesso"});
            } catch (erro) {
              res
                .status(500)

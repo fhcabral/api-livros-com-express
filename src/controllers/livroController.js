@@ -1,4 +1,3 @@
-import { autor } from "../models/Autor.js";
 import { livro } from "../models/Livro.js"
 
 class LivroController {
@@ -82,7 +81,7 @@ class LivroController {
             const livrosPorEditora = await livro.find({ editora: editora });
             res.status(200).json(livrosPorEditora);
         } catch(erro){
-
+            console.error(`Erro ao listar - ${erro}`)
         }
     }
 
